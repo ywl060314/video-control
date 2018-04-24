@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+        <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+        <style>
+            *{
+                margin: 0；
+                padding: 0;
+            }
+            figcaption{
+                text-align: center;
+                font: 700 30px/40px 微软雅黑; 
+            }
+            .player{
+                width: 720px;
+                height: 360px;
+                margin: 10px auto;
+                border: 1px solid #000;
+                text-align: center;
+                background-color: #000;
+                /*添加过场动画*/
+                /*background: url(loading.gif) center no-repeat;*/
+                /*设置背景图像宽高*/
+                background-size: auto 100%;
+                position: relative;
+            }
+            .player video{
+                height: 100%;
+                display: block;
+                margin: 0 auto;
+                display: none;
+            }
+            .controls{
+                width: 700px;
+                height: 40px;
+                background: rgba(255, 255, 0, 0.3);
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                border-radius: 10px; 
+            }
+            .switch{
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                color: #fff;
+                left: 10px;
+                top: 10px;
+                line-height: 20px;
+            }
+            .progress{
+                width: 432px;
+                height: 10px;
+                position: absolute;
+                left: 40px;
+                top: 15px;
+                background-color: #aaa;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+            .curr-progress{
+                width: 0%;
+                height: 10px;
+                background-color: #fff;
+            }
+            .time{
+                width: 120px;
+                height: 20px;
+                text-align: center;
+                line-height: 20px;
+                color: #fff;
+                position: absolute;
+                left: 490px;
+                top: 10px;
+            }
+            .extend{
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                right: 20px;
+                top: 10px;
+                text-align: center;
+                line-height: 20px;
+                color: #fff;
+            }
+
+        </style>
+    </head>
+    <body>
+        <figure>
+            <figcaption>多媒体控制条设计</figcaption>
+            <div class="player">
+                <video src="../test-video.mp4"></video>
+                <!-- 控制条 -->
+                <div class="controls">
+                    <!-- 播放暂停 -->
+                    <a href="#" class="switch glyphicon glyphicon-play"></a>
+                    <!-- 当前进度 -->
+                    <div class="progress">
+                        <div class="curr-progress"></div>
+                    </div>
+                    <!-- 时间 -->
+                    <div class="time">
+                        <span class="curr-time">00:00:00</span><span>/</span><span class="total-time">00:00:00</span>
+                    </div>
+                    <!-- 全屏 -->
+                    <a href="#" class="extend glyphicon glyphicon-resize-full"></a>
+                </div> 
+            </div>
+        </figure>
+        <script>
+
+        //功能：点击按钮，实现播放暂停并切换图标//计算视频总时长并显示//视频播放时进度条和时间同步//点击实现全屏并切换图标
+        
+        //获取对应标签
+        var video = document.querySelector("video");
+        //播放暂停按钮
+        var playBtn = document.querySelector(".switch");
+        //总时间
+        var totalTime = document.querySelector(".total-time");
+        //当前时间
+        var currTime = document.querySelector(".curr-time");
+        //当前进度条
+        var currProgress = document.querySelector(".curr-progress");
+        //全屏按钮
+        var extend = document.querySelector(".extend");
+        //获得视频总时长，以秒计
+        var tTime = 0;
+
+
+        //点击按钮，实现播放暂停并切换图标
+        playBtn.onclick = function(){
+            //视频播放时暂停，视频暂停时播放
+            if (video.paused) {
+                video.play();
+                this.classList.add("glyphicon-pause");
+                this.classList.remove("glyphicon-play");
+                this.style.color = "#fff";
+                this.style.textDecoration = "none";
+            }
+            else{
+                video.pause();
+                this.classList.add("glyphicon-play");
+                this.classList.remove("glyphicon-pause");
+                this.style.color = "#fff";
+                this.style.textDecoration = "none";
+            }
+        }
+
+        //计算视频总时长并显示
+        //当视频加载完成、可以播放时
+        video.oncanplay = function(){
+            //获得视频总时长，以秒计
+            tTime = video.duration;
+            //将总秒数转换成时分秒格式（00:00:00）
+            //小时
+            var h = Math.floor(tTime/3600);
+            //分钟
+            var m = Math.floor(tTime%3600/60);
+            //秒
+            var s = Math.floor(tTime%60);
+            //如果取值是个数的话，在前面加0
+            h = h>=10?h:"0"+h;
+            m = m>=10?m:"0"+m;
+            s = s>=10?s:"0"+s;
+            //把数据格式转换成00:00:00的格式并显示
+            totalTime.innerHTML = h + ":" + m + ":" + s;
+        }
+
+        //视频播放时进度条和时间同步
+        //在当前时间更新的时候触发
+        video.ontimeupdate = function(){
+            //获得视频当前播放时间
+            var cTime = video.currentTime;
+            //修改时间格式
+            var h = Math.floor(cTime/3600);
+            var m = Math.floor(cTime%3600/60);
+            var s = Math.floor(cTime%60);
+            h = h>=10?h:"0"+h;
+            m = m>=10?m:"0"+m;
+            s = s>=10?s:"0"+s;
+            //把数据格式转换成00:00:00的格式并显示
+            currTime.innerHTML = h + ":" + m + ":" + s;
+            //进度条同步（当前时间/总时间）
+            var value = cTime/tTime;
+            currProgress.style.width = value * 100 + "%";
+        }
+        //全屏
+        extend.onclick = function () {
+            //h5自带的全屏，全屏后会使用浏览器自带的控制条
+            video.webkitRequestFullScreen();
+        }
+
+
+        </script>
+    </body>
+</html>
+<!-- 1、点击进度条切视频时间；2、调节音量、设置静音-->
